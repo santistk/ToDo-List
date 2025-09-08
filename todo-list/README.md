@@ -4,6 +4,8 @@
 
 Sistema web de gestión de tareas (To-Do List) desarrollado con Java EE, JSF/PrimeFaces y CDI. Permite a los usuarios crear, gestionar y completar tareas de manera intuitiva.
 
+Quiero mencionar que todo funciona a cabalidad, sin embargo, como ya se ha hecho con tareas anteriores, sí llegase a haber algo que se deba cambiar, modificar o incluso mejorar, agradeceré de todo corazón hacérmelo saber para poder tomar esas oportunidades de mejora.
+
 ## Desarrollador
 
 - **Kennet Anderson Santisteban Torres**
@@ -39,6 +41,7 @@ src/
 │       └── index.xhtml
 └── pom.xml
 ```
+
 
 
 
