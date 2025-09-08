@@ -1,0 +1,4 @@
+com\jaestradag\todolist\repositories\TaskRepository.class
+com\jaestradag\todolist\models\Task.class
+com\jaestradag\todolist\controllers\TaskController.class
+com\jaestradag\todolist\services\TaskService.class

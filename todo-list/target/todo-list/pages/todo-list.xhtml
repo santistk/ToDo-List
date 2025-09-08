@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="content">
+
+        <h:panelGroup id="formStats" layout="block">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-content">
+                        <div class="stat-icon primary">
+                            <i class="pi pi-list"></i>
+                        </div>
+                        <div class="stat-details">
+                            <div class="stat-number">#{taskController.totalTaskCount}</div>
+                            <div class="stat-label">Total de Tareas</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-content">
+                        <div class="stat-icon warning">
+                            <i class="pi pi-clock"></i>
+                        </div>
+                        <div class="stat-details">
+                            <div class="stat-number">#{taskController.pendingTaskCount}</div>
+                            <div class="stat-label">Pendientes</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-content">
+                        <div class="stat-icon success">
+                            <i class="pi pi-check-circle"></i>
+                        </div>
+                        <div class="stat-details">
+                            <div class="stat-number">#{taskController.completedTaskCount}</div>
+                            <div class="stat-label">Completadas</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </h:panelGroup>
+            
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Agregar Nueva Tarea</h3>
+            </div>
+            <h:form id="formAddTask">
+                <div class="p-inputgroup">
+                    <p:inputText id="newTaskInput" 
+                                value="#{taskController.newTaskDescription}" 
+                                placeholder="Ingresa una nueva tarea..."
+                                styleClass="ui-inputtext"/>
+                    <p:commandButton value="Agregar Tarea" 
+                                    icon="pi pi-plus"
+                                    actionListener="#{taskController.addTask}"
+                                    update=":formAddTask :formTasks :formStats :clearCompletedButton :globalGrowl"
+                                    styleClass="p-button-primary"/>
+                </div>
+            </h:form>
+        </div>
+        
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Lista de Tareas</h3>
+                <p class="card-subtitle">Gestiona tus tareas pendientes y completadas</p>
+            </div>
+            <div class="table-section">
+                <h:form id="formTasks">
+                    <p:dataTable id="table" 
+                                value="#{taskController.allTasks}" 
+                                var="task"
+                                styleClass="ui-datatable"
+                                emptyMessage="No hay tareas disponibles">
+                        
+                        <p:column headerText="Estado" style="width: 120px; text-align: center;">
+                            <div class="task-status">
+                                <i class="#{task.completed ? 'pi pi-check-circle' : 'pi pi-clock'}" 
+                                   styleClass="#{task.completed ? 'task-completed-icon' : 'task-pending-icon'}"></i>
+                                <small>#{task.completed ? 'Completada' : 'Pendiente'}</small>
+                            </div>
+                        </p:column>
+                        
+                        <p:column headerText="Descripción" style="width: 60%;">
+                            <div class="task-description #{task.completed ? 'completed' : ''}">
+                                #{task.description}
+                            </div>
+                            <div class="task-meta">
+                                Creada: #{task.createdAt}
+                                <ui:fragment rendered="#{task.completed}">
+                                    <br/>Completada: #{task.completedAt}
+                                </ui:fragment>
+                            </div>
+                        </p:column>
+                        
+                        <p:column headerText="Acciones" style="width: 220px; text-align: center;">
+                            <div class="action-buttons">
+                                <p:commandButton icon="#{task.completed ? 'pi pi-undo' : 'pi pi-check'}" 
+                                               value="#{task.completed ? 'Desmarcar' : 'Completar'}"
+                                               actionListener="#{taskController.toggleTaskCompletion(task.id)}"
+                                               update=":formTasks :formStats :clearCompletedButton :globalGrowl"
+                                               immediate="true"
+                                               styleClass="#{task.completed ? 'p-button-warning' : 'p-button-success'}"/>
+                                
+                                <p:commandButton icon="pi pi-trash" 
+                                               value="Eliminar"
+                                               actionListener="#{taskController.deleteTask(task.id)}"
+                                               update=":formTasks :formStats :clearCompletedButton :globalGrowl"
+                                               immediate="true"
+                                               styleClass="p-button-danger"/>
+                            </div>
+                        </p:column>
+                    </p:dataTable>
+                </h:form>
+            </div>
+        </div>
+            
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Filtros y Acciones</h3>
+                <p class="card-subtitle">Filtra y gestiona tus tareas</p>
+            </div>
+            
+            <h:panelGroup id="clearCompletedButton" class="clear-completed-btn">
+                <p:commandButton value="Limpiar Completadas" 
+                                icon="pi pi-trash" 
+                                actionListener="#{taskController.clearCompletedTasks()}"
+                                update=":formTasks :formStats :clearCompletedButton :globalGrowl"
+                                styleClass="p-button-warning p-button-outlined"
+                                rendered="#{taskController.completedTaskCount > 0}"/>
+            </h:panelGroup>
+            
+            <div class="filter-buttons">
+                <p:commandButton value="Ver Solo Pendientes" 
+                               action="#{taskController.filterPending()}" 
+                               update=":formTasks :formStats"
+                               styleClass="#{taskController.filterType == 'pending' ? 'p-button-info' : 'p-button-info p-button-outlined'}"/>
+                
+                <p:commandButton value="Ver Solo Completadas" 
+                               action="#{taskController.filterCompleted()}" 
+                               update=":formTasks :formStats"
+                               styleClass="#{taskController.filterType == 'completed' ? 'p-button-success' : 'p-button-success p-button-outlined'}"/>
+                
+                <p:commandButton value="Ver Todas" 
+                               action="#{taskController.filterAll()}" 
+                               update=":formTasks :formStats"
+                               styleClass="#{taskController.filterType == 'all' ? 'p-button-secondary' : 'p-button-secondary p-button-outlined'}"/>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>
+</html>
